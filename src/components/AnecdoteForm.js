@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from "react-query";
 import { createDote } from "../requests";
+import { useDispatchValue } from "../context/ShowContext";
 
 const AnecdoteForm = () => {
+  const dispatch = useDispatchValue();
   const queryClient = useQueryClient();
   const newNoteMutation = useMutation(createDote, {
     onSuccess: (newNote) => {
@@ -12,6 +14,16 @@ const AnecdoteForm = () => {
 
   const onCreate = (event) => {
     event.preventDefault();
+    if (event.target.anecdote.value.length < 5) {
+      dispatch({
+        type: "SHOW_NOTE",
+        payload: "too short anecdote, must have length 5 or more",
+      });
+      setTimeout(() => {
+        dispatch({ type: "REMOVE_NOTE", payload: "" });
+      }, 5000);
+      return;
+    }
     const content = event.target.anecdote.value;
     event.target.anecdote.value = "";
     newNoteMutation.mutate({ content, votes: 0 });
